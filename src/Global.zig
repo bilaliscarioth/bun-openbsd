@@ -117,9 +117,10 @@ pub fn isExiting() bool {
 pub fn exitWide(code: u32) noreturn {
     is_exiting.store(true, .monotonic);
 
-    if (comptime Environment.isMac) {
+    if (comptime Environment.isMac or Environment.isOpenBSD) {
         std.c.exit(@bitCast(code));
     }
+
     bun.C.quick_exit(@bitCast(code));
 }
 

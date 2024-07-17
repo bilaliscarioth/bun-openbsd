@@ -236,8 +236,8 @@ pub const FDImpl = packed struct {
                 const fd = this.encode();
                 std.debug.assert(fd != bun.invalid_fd);
                 std.debug.assert(fd.cast() > -1);
-                break :result switch (linux.getErrno(linux.close(fd.cast()))) {
-                    .BADF => bun.sys.Error{ .errno = @intFromEnum(os.E.BADF), .syscall = .close, .fd = fd },
+                break :result switch (bun.C.getErrno(bun.sys.system.close(fd.cast()))) {
+                    .BADF => bun.sys.Error{ .errno = @intFromEnum(posix.E.BADF), .syscall = .close, .fd = fd },
                     else => null,
                 };
             },

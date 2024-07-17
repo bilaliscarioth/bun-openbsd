@@ -187,7 +187,7 @@ pub fn crashHandler(
                                 writer.print("(thread {d})", .{std.os.windows.kernel32.GetCurrentThreadId()}) catch std.posix.abort();
                             }
                         },
-                        .mac, .linux => {},
+                        .mac, .linux, .openbsd => {},
                         else => @compileError("TODO"),
                     }
 
@@ -635,6 +635,7 @@ fn handleSegfaultPosix(sig: i32, info: *const std.posix.siginfo_t, _: ?*const an
     const addr = switch (bun.Environment.os) {
         .linux => @intFromPtr(info.fields.sigfault.addr),
         .mac => @intFromPtr(info.addr),
+        .openbsd => @intFromPtr(info.data.fault.addr),
         else => @compileError(unreachable),
     };
 
@@ -849,6 +850,8 @@ const Platform = enum(u8) {
 
     windows_x86_64 = 'w',
     windows_x86_64_baseline = 'e',
+
+    openbsd_x86_64 = 'o',
 
     const current = @field(Platform, @tagName(bun.Environment.os) ++
         "_" ++ @tagName(builtin.target.cpu.arch) ++
@@ -1244,7 +1247,7 @@ fn report(url: []const u8) void {
             // we don't care what happens with the process
             _ = spawn_result;
         },
-        .mac, .linux => {
+        .mac, .openbsd, .linux => {
             var buf: bun.PathBuffer = undefined;
             var buf2: bun.PathBuffer = undefined;
             const curl = bun.which(

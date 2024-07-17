@@ -1070,7 +1070,6 @@ pub const Interpreter = struct {
                 break :brk cwd_str;
             };
 
-            const O = std.c.O{ .DIRECTORY = true };
             const new_cwd_fd = switch (Syscall.openat(
                 this.cwd_fd,
                 new_cwd,
@@ -1083,7 +1082,6 @@ pub const Interpreter = struct {
                 },
             };
             _ = Syscall.close2(this.cwd_fd);
-
 
             this.__prev_cwd.clearRetainingCapacity();
             this.__prev_cwd.appendSlice(this.__cwd.items[0..]) catch bun.outOfMemory();

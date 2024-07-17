@@ -33,7 +33,7 @@ pub const syslog = log;
 pub const system = switch (Environment.os) {
     .linux => std.os.linux,
     .mac => bun.AsyncIO.system,
-    .openbsd => openbsd,
+    .openbsd => std.posix,
     else => @compileError("not implemented"),
 };
 
@@ -674,7 +674,7 @@ pub fn mkdir(file_path: [:0]const u8, flags: bun.Mode) Maybe(void) {
 
         .linux => Maybe(void).errnoSysP(system.mkdir(file_path, flags), .mkdir, file_path) orelse Maybe(void).success,
 
-        .openbsd => Maybe(void).errnoSysP(openbsd.mkdir(file_path, flags), .mkdir, file_path) orelse Maybe(void).success,
+        .openbsd => Maybe(void).errnoSysP(system.mkdir(file_path, flags), .mkdir, file_path) orelse Maybe(void).success,
 
         .windows => {
             var wbuf: bun.WPathBuffer = undefined;
@@ -1681,6 +1681,7 @@ pub fn read(fd: bun.FileDescriptor, buf: []u8) Maybe(usize) {
                 }
                 return Maybe(usize){ .result = @as(usize, @intCast(rc)) };
             }
+        },
         .windows => if (bun.FDImpl.decode(fd).kind == .uv)
             sys_uv.read(fd, buf)
         else {

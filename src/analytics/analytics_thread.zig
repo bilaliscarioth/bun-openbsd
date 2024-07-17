@@ -274,7 +274,7 @@ pub const GenerateHeader = struct {
             return platform;
         }
 
-        pub var linux_os_name: std.c.utsname = undefined;
+        pub var linux_os_name: std.posix.utsname = undefined;
         var platform_: Analytics.Platform = undefined;
         pub const Platform = Analytics.Platform;
         var linux_kernel_version: Semver.Version = undefined;

@@ -591,6 +591,8 @@ pub const OS = struct {
                         break @as(?*std.posix.sockaddr.ll, @ptrCast(@alignCast(ll_iface.ifa_addr)));
                     } else if (comptime (Environment.isMac or Environment.isOpenBSD)) {
                         break @as(?*C.sockaddr_dl, @ptrCast(@alignCast(ll_iface.ifa_addr)));
+                    } else if (comptime Environment.isOpenBSD) {
+                        break @as(?*C.openbsd.sockaddr, @ptrCast(@alignCast(ll_iface.ifa_addr)));
                     } else {
                         @compileError("unreachable");
                     }
@@ -600,7 +602,7 @@ pub const OS = struct {
                     // Encode its link-layer address.  We need 2*6 bytes for the
                     //  hex characters and 5 for the colon separators
                     var mac_buf: [17]u8 = undefined;
-                    const addr_data = if (comptime Environment.isLinux) ll_addr.addr else if (comptime Environment.isMac or comptime Environemnt.isOpenBSD) ll_addr.sdl_data[ll_addr.sdl_nlen..] else @compileError("unreachable");
+                    const addr_data = if (comptime Environment.isLinux) ll_addr.addr else if (comptime (Environment.isMac or Environment.isOpenBSD)) ll_addr.sdl_data[ll_addr.sdl_nlen..] else @compileError("unreachable");
                     if (addr_data.len < 6) {
                         const mac = "00:00:00:00:00:00";
                         interface.put(globalThis, JSC.ZigString.static("mac"), JSC.ZigString.init(mac).withEncoding().toJS(globalThis));

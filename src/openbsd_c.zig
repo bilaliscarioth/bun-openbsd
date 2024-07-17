@@ -1,14 +1,5 @@
 const std = @import("std");
 const bun = @import("root").bun;
-const builtin = @import("builtin");
-const os = std.os;
-const mem = std.mem;
-const Stat = std.fs.File.Stat;
-const Kind = std.fs.File.Kind;
-const StatError = std.fs.File.StatError;
-const off_t = std.c.off_t;
-const errno = os.errno;
-const zeroes = mem.zeroes;
 
 pub const SystemErrno = enum(u8) {
     SUCCESS = 0,
@@ -49,14 +40,14 @@ pub const SystemErrno = enum(u8) {
     EAGAIN = 35,
     EINPROGRESS = 36,
     EALREADY = 37,
-    ENOTSOCK = 38,
+    ENOTSTOCK = 38,
     EDESTADDRREQ = 39,
     EMSGSIZE = 40,
     EPROTOTYPE = 41,
     ENOPROTOOPT = 42,
     EPROTONOSUPPORT = 43,
     ESOCKTNOSUPPORT = 44,
-    ENOTSUP = 45,
+    EOPNOTSUPP = 45,
     EPFNOSUPPORT = 46,
     EAFNOSUPPORT = 47,
     EADDRINUSE = 48,
@@ -82,7 +73,6 @@ pub const SystemErrno = enum(u8) {
     EUSERS = 68,
     EDQUOT = 69,
     ESTALE = 70,
-    EREMOTE = 71,
     EBADRPC = 72,
     ERPCMISMATCH = 73,
     EPROGUNAVAIL = 74,
@@ -93,33 +83,22 @@ pub const SystemErrno = enum(u8) {
     EFTYPE = 79,
     EAUTH = 80,
     ENEEDAUTH = 81,
-    EPWROFF = 82,
-    EDEVERR = 83,
-    EOVERFLOW = 84,
-    EBADEXEC = 85,
-    EBADARCH = 86,
-    ESHLIBVERS = 87,
-    EBADMACHO = 88,
-    ECANCELED = 89,
-    EIDRM = 90,
-    ENOMSG = 91,
-    EILSEQ = 92,
-    ENOATTR = 93,
-    EBADMSG = 94,
-    EMULTIHOP = 95,
-    ENODATA = 96,
-    ENOLINK = 97,
-    ENOSR = 98,
-    ENOSTR = 99,
-    EPROTO = 100,
-    ETIME = 101,
-    EOPNOTSUPP = 102,
-    ENOPOLICY = 103,
-    ENOTRECOVERABLE = 104,
-    EOWNERDEAD = 105,
-    EQFULL = 106,
+    EIPSEC = 82,
+    ENOATTR = 83,
+    EILSEQ = 84,
+    ENOMEDIUM = 85,
+    EMEDIUMTYPE = 86,
+    EOVERFLOW = 87,
+    ECANCELED = 88,
+    EIDRM = 89,
+    ENOMSG = 90,
+    ENOTSUP = 91,
+    EBADMSG = 92,
+    ENOTRECOVERABLE = 93,
+    EOWNERDEAD = 94,
+    EPROTO = 95,
 
-    pub const max = 107;
+    pub const max = 96;
 
     pub fn init(code: anytype) ?SystemErrno {
         if (code < 0) {
@@ -139,455 +118,547 @@ pub const SystemErrno = enum(u8) {
     const LabelMap = std.EnumMap(SystemErrno, []const u8);
     pub const labels: LabelMap = brk: {
         var map: LabelMap = LabelMap.initFull("");
+
+        map.put(.EPERM, "Operation not permitted");
+        map.put(.ENOENT, "No such file or directory");
+        map.put(.ESRCH, "No such process");
+        map.put(.EINTR, "Interrupted system call");
+        map.put(.EIO, "I/O error");
+        map.put(.ENXIO, "No such device or address");
         map.put(.E2BIG, "Argument list too long");
-        map.put(.EACCES, "Permission denied");
-        map.put(.EADDRINUSE, "Address already in use");
-        map.put(.EADDRNOTAVAIL, "Can't assign requested address");
-        map.put(.EAFNOSUPPORT, "Address family not supported by protocol family");
-        map.put(.EAGAIN, "non-blocking and interrupt i/o. Resource temporarily unavailable");
-        map.put(.EALREADY, "Operation already in progress");
-        map.put(.EAUTH, "Authentication error");
-        map.put(.EBADARCH, "Bad CPU type in executable");
-        map.put(.EBADEXEC, "Program loading errors. Bad executable");
+        map.put(.ENOEXEC, "Exec format error");
         map.put(.EBADF, "Bad file descriptor");
-        map.put(.EBADMACHO, "Malformed Macho file");
-        map.put(.EBADMSG, "Bad message");
-        map.put(.EBADRPC, "RPC struct is bad");
-        map.put(.EBUSY, "Device / Resource busy");
-        map.put(.ECANCELED, "Operation canceled");
         map.put(.ECHILD, "No child processes");
-        map.put(.ECONNABORTED, "Software caused connection abort");
-        map.put(.ECONNREFUSED, "Connection refused");
-        map.put(.ECONNRESET, "Connection reset by peer");
-        map.put(.EDEADLK, "Resource deadlock avoided");
-        map.put(.EDESTADDRREQ, "Destination address required");
-        map.put(.EDEVERR, "Device error, for example paper out");
-        map.put(.EDOM, "math software. Numerical argument out of domain");
-        map.put(.EDQUOT, "Disc quota exceeded");
-        map.put(.EEXIST, "File or folder exists");
+        map.put(.EAGAIN, "Try again");
+        map.put(.ENOMEM, "Out of memory");
+        map.put(.EACCES, "Permission denied");
         map.put(.EFAULT, "Bad address");
+        map.put(.ENOTBLK, "Block device required");
+        map.put(.EBUSY, "Device or resource busy");
+        map.put(.EEXIST, "File or folder exists");
+        map.put(.EXDEV, "Cross-device link");
+        map.put(.ENODEV, "No such device");
+        map.put(.ENOTDIR, "Not a directory");
+        map.put(.EISDIR, "Is a directory");
+        map.put(.EINVAL, "Invalid argument");
+        map.put(.ENFILE, "File table overflow");
+        map.put(.EMFILE, "Too many open files");
+        map.put(.ENOTTY, "Not a typewriter");
+        map.put(.ETXTBSY, "Text file busy");
         map.put(.EFBIG, "File too large");
-        map.put(.EFTYPE, "Inappropriate file type or format");
+        map.put(.ENOSPC, "No space left on device");
+        map.put(.ESPIPE, "Illegal seek");
+        map.put(.EROFS, "Read-only file system");
+        map.put(.EMLINK, "Too many links");
+        map.put(.EPIPE, "Broken pipe");
+        map.put(.EDOM, "Math argument out of domain of func");
+        map.put(.ERANGE, "Math result not representable");
+        map.put(.EDEADLK, "Resource deadlock would occur");
+        map.put(.ENAMETOOLONG, "File name too long");
+        map.put(.ENOLCK, "No record locks available");
+        map.put(.ENOSYS, "Function not implemented");
+        map.put(.ENOTEMPTY, "Directory not empty");
+        map.put(.ELOOP, "Too many symbolic links encountered");
+        map.put(.ENOMSG, "No message of desired type");
+        map.put(.EIDRM, "Identifier removed");
+        map.put(.ECHRNG, "Channel number out of range");
+        map.put(.EL2NSYNC, "Level 2 not synchronized");
+        map.put(.EL3HLT, "Level 3 halted");
+        map.put(.EL3RST, "Level 3 reset");
+        map.put(.ELNRNG, "Link number out of range");
+        map.put(.EUNATCH, "Protocol driver not attached");
+        map.put(.ENOCSI, "No CSI structure available");
+        map.put(.EL2HLT, "Level 2 halted");
+        map.put(.EBADE, "Invalid exchange");
+        map.put(.EBADR, "Invalid request descriptor");
+        map.put(.EXFULL, "Exchange full");
+        map.put(.ENOANO, "No anode");
+        map.put(.EBADRQC, "Invalid request code");
+        map.put(.EBADSLT, "Invalid slot");
+        map.put(.EBFONT, "Bad font file format");
+        map.put(.ENOSTR, "Device not a stream");
+        map.put(.ENODATA, "No data available");
+        map.put(.ETIME, "Timer expired");
+        map.put(.ENOSR, "Out of streams resources");
+        map.put(.ENONET, "Machine is not on the network");
+        map.put(.ENOPKG, "Package not installed");
+        map.put(.EREMOTE, "Object is remote");
+        map.put(.ENOLINK, "Link has been severed");
+        map.put(.EADV, "Advertise error");
+        map.put(.ESRMNT, "Srmount error");
+        map.put(.ECOMM, "Communication error on send");
+        map.put(.EPROTO, "Protocol error");
+        map.put(.EMULTIHOP, "Multihop attempted");
+        map.put(.EDOTDOT, "RFS specific error");
+        map.put(.EBADMSG, "Not a data message");
+        map.put(.EOVERFLOW, "Value too large for defined data type");
+        map.put(.ENOTUNIQ, "Name not unique on network");
+        map.put(.EBADFD, "File descriptor in bad state");
+        map.put(.EREMCHG, "Remote address changed");
+        map.put(.ELIBACC, "Can not access a needed shared library");
+        map.put(.ELIBBAD, "Accessing a corrupted shared library");
+        map.put(.ELIBSCN, "lib section in a.out corrupted");
+        map.put(.ELIBMAX, "Attempting to link in too many shared libraries");
+        map.put(.ELIBEXEC, "Cannot exec a shared library directly");
+        map.put(.EILSEQ, "Illegal byte sequence");
+        map.put(.ERESTART, "Interrupted system call should be restarted");
+        map.put(.ESTRPIPE, "Streams pipe error");
+        map.put(.EUSERS, "Too many users");
+        map.put(.ENOTSOCK, "Socket operation on non-socket");
+        map.put(.EDESTADDRREQ, "Destination address required");
+        map.put(.EMSGSIZE, "Message too long");
+        map.put(.EPROTOTYPE, "Protocol wrong type for socket");
+        map.put(.ENOPROTOOPT, "Protocol not available");
+        map.put(.EPROTONOSUPPORT, "Protocol not supported");
+        map.put(.ESOCKTNOSUPPORT, "Socket type not supported");
+        map.put(.ENOTSUP, "Operation not supported on transport endpoint");
+        map.put(.EPFNOSUPPORT, "Protocol family not supported");
+        map.put(.EAFNOSUPPORT, "Address family not supported by protocol");
+        map.put(.EADDRINUSE, "Address already in use");
+        map.put(.EADDRNOTAVAIL, "Cannot assign requested address");
+        map.put(.ENETDOWN, "Network is down");
+        map.put(.ENETUNREACH, "Network is unreachable");
+        map.put(.ENETRESET, "Network dropped connection because of reset");
+        map.put(.ECONNABORTED, "Software caused connection abort");
+        map.put(.ECONNRESET, "Connection reset by peer");
+        map.put(.ENOBUFS, "No buffer space available");
+        map.put(.EISCONN, "Transport endpoint is already connected");
+        map.put(.ENOTCONN, "Transport endpoint is not connected");
+        map.put(.ESHUTDOWN, "Cannot send after transport endpoint shutdown");
+        map.put(.ETOOMANYREFS, "Too many references: cannot splice");
+        map.put(.ETIMEDOUT, "Connection timed out");
+        map.put(.ECONNREFUSED, "Connection refused");
         map.put(.EHOSTDOWN, "Host is down");
         map.put(.EHOSTUNREACH, "No route to host");
-        map.put(.EIDRM, "Identifier removed");
-        map.put(.EILSEQ, "Illegal byte sequence");
+        map.put(.EALREADY, "Operation already in progress");
         map.put(.EINPROGRESS, "Operation now in progress");
-        map.put(.EINTR, "Interrupted system call");
-        map.put(.EINVAL, "Invalid argument");
-        map.put(.EIO, "Input/output error");
-        map.put(.EISCONN, "Socket is already connected");
-        map.put(.EISDIR, "Is a directory");
-        map.put(.ELOOP, "Too many levels of symbolic links");
-        map.put(.EMFILE, "Too many open files");
-        map.put(.EMLINK, "Too many links");
-        map.put(.EMSGSIZE, "Message too long");
-        map.put(.EMULTIHOP, "Reserved");
-        map.put(.ENAMETOOLONG, "File name too long");
-        map.put(.ENEEDAUTH, "Need authenticator");
-        map.put(.ENETDOWN, "ipc/network software - operational errors Network is down");
-        map.put(.ENETRESET, "Network dropped connection on reset");
-        map.put(.ENETUNREACH, "Network is unreachable");
-        map.put(.ENFILE, "Too many open files in system");
-        map.put(.ENOATTR, "Attribute not found");
-        map.put(.ENOBUFS, "No buffer space available");
-        map.put(.ENODATA, "No message available on STREAM");
-        map.put(.ENODEV, "Operation not supported by device");
-        map.put(.ENOENT, "No such file or directory");
-        map.put(.ENOEXEC, "Exec format error");
-        map.put(.ENOLCK, "No locks available");
-        map.put(.ENOLINK, "Reserved");
-        map.put(.ENOMEM, "Cannot allocate memory");
-        map.put(.ENOMSG, "No message of desired type");
-        map.put(.ENOPOLICY, "No such policy registered");
-        map.put(.ENOPROTOOPT, "Protocol not available");
-        map.put(.ENOSPC, "No space left on device");
-        map.put(.ENOSR, "No STREAM resources");
-        map.put(.ENOSTR, "Not a STREAM");
-        map.put(.ENOSYS, "Function not implemented");
-        map.put(.ENOTBLK, "Block device required");
-        map.put(.ENOTCONN, "Socket is not connected");
-        map.put(.ENOTDIR, "Not a directory");
-        map.put(.ENOTEMPTY, "Directory not empty");
+        map.put(.ESTALE, "Stale NFS file handle");
+        map.put(.EUCLEAN, "Structure needs cleaning");
+        map.put(.ENOTNAM, "Not a XENIX named type file");
+        map.put(.ENAVAIL, "No XENIX semaphores available");
+        map.put(.EISNAM, "Is a named type file");
+        map.put(.EREMOTEIO, "Remote I/O error");
+        map.put(.EDQUOT, "Quota exceeded");
+        map.put(.ENOMEDIUM, "No medium found");
+        map.put(.EMEDIUMTYPE, "Wrong medium type");
+        map.put(.ECANCELED, "Operation Canceled");
+        map.put(.ENOKEY, "Required key not available");
+        map.put(.EKEYEXPIRED, "Key has expired");
+        map.put(.EKEYREVOKED, "Key has been revoked");
+        map.put(.EKEYREJECTED, "Key was rejected by service");
+        map.put(.EOWNERDEAD, "Owner died");
         map.put(.ENOTRECOVERABLE, "State not recoverable");
-        map.put(.ENOTSOCK, "ipc/network software - argument errors. Socket operation on non-socket");
-        map.put(.ENOTSUP, "Operation not supported");
-        map.put(.ENOTTY, "Inappropriate ioctl for device");
-        map.put(.ENXIO, "Device not configured");
-        map.put(.EOVERFLOW, "Value too large to be stored in data type");
-        map.put(.EOWNERDEAD, "Previous owner died");
-        map.put(.EPERM, "Operation not permitted");
-        map.put(.EPFNOSUPPORT, "Protocol family not supported");
-        map.put(.EPIPE, "Broken pipe");
-        map.put(.EPROCLIM, "quotas & mush. Too many processes");
-        map.put(.EPROCUNAVAIL, "Bad procedure for program");
-        map.put(.EPROGMISMATCH, "Program version wrong");
-        map.put(.EPROGUNAVAIL, "RPC prog. not avail");
-        map.put(.EPROTO, "Protocol error");
-        map.put(.EPROTONOSUPPORT, "Protocol not supported");
-        map.put(.EPROTOTYPE, "Protocol wrong type for socket");
-        map.put(.EPWROFF, "Intelligent device errors. Device power is off");
-        map.put(.EQFULL, "Interface output queue is full");
-        map.put(.ERANGE, "Result too large");
-        map.put(.EREMOTE, "Too many levels of remote in path");
-        map.put(.EROFS, "Read-only file system");
-        map.put(.ERPCMISMATCH, "RPC version wrong");
-        map.put(.ESHLIBVERS, "Shared library version mismatch");
-        map.put(.ESHUTDOWN, "Can’t send after socket shutdown");
-        map.put(.ESOCKTNOSUPPORT, "Socket type not supported");
-        map.put(.ESPIPE, "Illegal seek");
-        map.put(.ESRCH, "No such process");
-        map.put(.ESTALE, "Network File System. Stale NFS file handle");
-        map.put(.ETIME, "STREAM ioctl timeout");
-        map.put(.ETIMEDOUT, "Operation timed out");
-        map.put(.ETOOMANYREFS, "Too many references: can't splice");
-        map.put(.ETXTBSY, "Text file busy");
-        map.put(.EUSERS, "Too many users");
-        // map.put(.EWOULDBLOCK, "Operation would block");
-        map.put(.EXDEV, "Cross-device link");
         break :brk map;
     };
 };
 
-// Courtesy of https://github.com/nodejs/node/blob/master/deps/uv/src/unix/darwin-stub.h
-pub const struct_CFArrayCallBacks = opaque {};
-pub const CFIndex = c_long;
-pub const struct_CFRunLoopSourceContext = extern struct {
-    version: CFIndex,
-    info: ?*anyopaque,
-    pad: [7]?*anyopaque,
-    perform: ?*const fn (?*anyopaque) callconv(.C) void,
+pub const preallocate_length = 2048 * 1024;
+pub fn preallocate_file(fd: std.posix.fd_t, offset: std.posix.off_t, len: std.posix.off_t) anyerror!void {
+    // https://gist.github.com/Jarred-Sumner/b37b93399b63cbfd86e908c59a0a37df
+    //  ext4 NVME Linux kernel 5.17.0-1016-oem x86_64
+    //
+    // hyperfine "./micro 1024 temp" "./micro 1024 temp --preallocate" --prepare="rm -rf temp && free && sync && echo 3 > /proc/sys/vm/drop_caches && free"
+    // Benchmark 1: ./micro 1024 temp
+    //   Time (mean ± σ):       1.8 ms ±   0.2 ms    [User: 0.6 ms, System: 0.1 ms]
+    //   Range (min … max):     1.2 ms …   2.3 ms    67 runs
+    // Benchmark 2: ./micro 1024 temp --preallocate
+    //   Time (mean ± σ):       1.8 ms ±   0.1 ms    [User: 0.6 ms, System: 0.1 ms]
+    //   Range (min … max):     1.4 ms …   2.2 ms    121 runs
+    // Summary
+    //   './micro 1024 temp --preallocate' ran
+    //     1.01 ± 0.13 times faster than './micro 1024 temp'
+
+    // hyperfine "./micro 65432 temp" "./micro 65432 temp --preallocate" --prepare="rm -rf temp && free && sync && echo 3 > /proc/sys/vm/drop_caches && free"
+    // Benchmark 1: ./micro 65432 temp
+    //   Time (mean ± σ):       1.8 ms ±   0.2 ms    [User: 0.7 ms, System: 0.1 ms]
+    //   Range (min … max):     1.2 ms …   2.3 ms    94 runs
+    // Benchmark 2: ./micro 65432 temp --preallocate
+    //   Time (mean ± σ):       2.0 ms ±   0.1 ms    [User: 0.6 ms, System: 0.1 ms]
+    //   Range (min … max):     1.7 ms …   2.3 ms    108 runs
+    // Summary
+    //   './micro 65432 temp' ran
+    //     1.08 ± 0.12 times faster than './micro 65432 temp --preallocate'
+
+    // hyperfine "./micro 654320 temp" "./micro 654320 temp --preallocate" --prepare="rm -rf temp && free && sync && echo 3 > /proc/sys/vm/drop_caches && free"
+    // Benchmark 1: ./micro 654320 temp
+    //   Time (mean ± σ):       2.3 ms ±   0.2 ms    [User: 0.9 ms, System: 0.3 ms]
+    //   Range (min … max):     1.9 ms …   2.9 ms    96 runs
+
+    // Benchmark 2: ./micro 654320 temp --preallocate
+    //   Time (mean ± σ):       2.2 ms ±   0.1 ms    [User: 0.9 ms, System: 0.2 ms]
+    //   Range (min … max):     1.9 ms …   2.7 ms    115 runs
+
+    //   Warning: Command took less than 5 ms to complete. Results might be inaccurate.
+
+    // Summary
+    //   './micro 654320 temp --preallocate' ran
+    //     1.04 ± 0.10 times faster than './micro 654320 temp'
+
+    // hyperfine "./micro 6543200 temp" "./micro 6543200 temp --preallocate" --prepare="rm -rf temp && free && sync && echo 3 > /proc/sys/vm/drop_caches && free"
+    // Benchmark 1: ./micro 6543200 temp
+    //   Time (mean ± σ):       6.3 ms ±   0.4 ms    [User: 0.4 ms, System: 4.9 ms]
+    //   Range (min … max):     5.8 ms …   8.6 ms    84 runs
+
+    // Benchmark 2: ./micro 6543200 temp --preallocate
+    //   Time (mean ± σ):       5.5 ms ±   0.3 ms    [User: 0.5 ms, System: 3.9 ms]
+    //   Range (min … max):     5.1 ms …   7.1 ms    93 runs
+
+    // Summary
+    //   './micro 6543200 temp --preallocate' ran
+    //     1.14 ± 0.09 times faster than './micro 6543200 temp'
+
+    // hyperfine "./micro 65432000 temp" "./micro 65432000 temp --preallocate" --prepare="rm -rf temp && free && sync && echo 3 > /proc/sys/vm/drop_caches && free"
+    // Benchmark 1: ./micro 65432000 temp
+    //   Time (mean ± σ):      52.9 ms ±   0.4 ms    [User: 3.1 ms, System: 48.7 ms]
+    //   Range (min … max):    52.4 ms …  54.4 ms    36 runs
+
+    // Benchmark 2: ./micro 65432000 temp --preallocate
+    //   Time (mean ± σ):      44.6 ms ±   0.8 ms    [User: 2.3 ms, System: 41.2 ms]
+    //   Range (min … max):    44.0 ms …  47.3 ms    37 runs
+
+    // Summary
+    //   './micro 65432000 temp --preallocate' ran
+    //     1.19 ± 0.02 times faster than './micro 65432000 temp'
+
+    // hyperfine "./micro 65432000 temp" "./micro 65432000 temp --preallocate" --prepare="rm -rf temp"
+    // Benchmark 1: ./micro 65432000 temp
+    //   Time (mean ± σ):      51.7 ms ±   0.9 ms    [User: 2.1 ms, System: 49.6 ms]
+    //   Range (min … max):    50.7 ms …  54.1 ms    49 runs
+
+    // Benchmark 2: ./micro 65432000 temp --preallocate
+    //   Time (mean ± σ):      43.8 ms ±   2.3 ms    [User: 2.2 ms, System: 41.4 ms]
+    //   Range (min … max):    42.7 ms …  54.7 ms    56 runs
+
+    // Summary
+    //   './micro 65432000 temp --preallocate' ran
+    //     1.18 ± 0.06 times faster than './micro 65432000 temp'
+    //
+    _ = std.os.linux.fallocate(fd, 0, @as(i64, @intCast(offset)), len);
+}
+
+/// splice() moves data between two file descriptors without copying
+/// between kernel address space and user address space.  It
+/// transfers up to len bytes of data from the file descriptor fd_in
+/// to the file descriptor fd_out, where one of the file descriptors
+/// must refer to a pipe.
+pub fn splice(fd_in: std.posix.fd_t, off_in: ?*i64, fd_out: std.posix.fd_t, off_out: ?*i64, len: usize, flags: u32) usize {
+    return std.os.linux.syscall6(
+        .splice,
+        @as(usize, @bitCast(@as(isize, fd_in))),
+        @intFromPtr(off_in),
+        @as(usize, @bitCast(@as(isize, fd_out))),
+        @intFromPtr(off_out),
+        len,
+        flags,
+    );
+}
+
+// System related
+pub const struct_sysinfo = extern struct {
+    uptime: c_long align(8),
+    loads: [3]c_ulong,
+    totalram: c_ulong,
+    freeram: c_ulong,
+    sharedram: c_ulong,
+    bufferram: c_ulong,
+    totalswap: c_ulong,
+    freeswap: c_ulong,
+    procs: u16,
+    pad: u16,
+    totalhigh: c_ulong,
+    freehigh: c_ulong,
+    mem_unit: u32,
+    pub fn _f(self: anytype) @import("std").zig.c_translation.FlexibleArrayType(@TypeOf(self), u8) {
+        const Intermediate = @import("std").zig.c_translation.FlexibleArrayType(@TypeOf(self), u8);
+        const ReturnType = @import("std").zig.c_translation.FlexibleArrayType(@TypeOf(self), u8);
+        return @as(ReturnType, @ptrCast(@alignCast(@as(Intermediate, @ptrCast(self)) + 108)));
+    }
 };
-pub const struct_FSEventStreamContext = extern struct {
-    version: CFIndex,
-    info: ?*anyopaque,
-    pad: [3]?*anyopaque,
-};
-pub const struct_CFRange = extern struct {
-    location: CFIndex,
-    length: CFIndex,
-};
-pub const CFAbsoluteTime = f64;
-pub const CFTimeInterval = f64;
-pub const FSEventStreamEventFlags = c_int;
-pub const OSStatus = c_int;
-pub const CFArrayCallBacks = struct_CFArrayCallBacks;
-pub const CFRunLoopSourceContext = struct_CFRunLoopSourceContext;
-pub const FSEventStreamContext = struct_FSEventStreamContext;
-pub const FSEventStreamCreateFlags = u32;
-pub const FSEventStreamEventId = u64;
-pub const CFStringEncoding = c_uint;
-pub const CFAllocatorRef = ?*anyopaque;
-pub const CFArrayRef = ?*anyopaque;
-pub const CFBundleRef = ?*anyopaque;
-pub const CFDataRef = ?*anyopaque;
-pub const CFDictionaryRef = ?*anyopaque;
-pub const CFMutableDictionaryRef = ?*anyopaque;
-pub const CFRange = struct_CFRange;
-pub const CFRunLoopRef = ?*anyopaque;
-pub const CFRunLoopSourceRef = ?*anyopaque;
-pub const CFStringRef = ?*anyopaque;
-pub const CFTypeRef = ?*anyopaque;
-pub const FSEventStreamRef = ?*anyopaque;
-pub const IOOptionBits = u32;
-pub const io_iterator_t = c_uint;
-pub const io_object_t = c_uint;
-pub const io_service_t = c_uint;
-pub const io_registry_entry_t = c_uint;
-pub const FSEventStreamCallback = ?*const fn (FSEventStreamRef, ?*anyopaque, c_int, ?*anyopaque, [*c]const FSEventStreamEventFlags, [*c]const FSEventStreamEventId) callconv(.C) void;
-pub const kCFStringEncodingUTF8: CFStringEncoding = @as(CFStringEncoding, @bitCast(@as(c_int, 134217984)));
-pub const noErr: OSStatus = 0;
-pub const kFSEventStreamEventIdSinceNow: FSEventStreamEventId = @as(FSEventStreamEventId, @bitCast(@as(c_longlong, -@as(c_int, 1))));
-pub const kFSEventStreamCreateFlagNoDefer: c_int = 2;
-pub const kFSEventStreamCreateFlagFileEvents: c_int = 16;
-pub const kFSEventStreamEventFlagEventIdsWrapped: c_int = 8;
-pub const kFSEventStreamEventFlagHistoryDone: c_int = 16;
-pub const kFSEventStreamEventFlagItemChangeOwner: c_int = 16384;
-pub const kFSEventStreamEventFlagItemCreated: c_int = 256;
-pub const kFSEventStreamEventFlagItemFinderInfoMod: c_int = 8192;
-pub const kFSEventStreamEventFlagItemInodeMetaMod: c_int = 1024;
-pub const kFSEventStreamEventFlagItemIsDir: c_int = 131072;
-pub const kFSEventStreamEventFlagItemModified: c_int = 4096;
-pub const kFSEventStreamEventFlagItemRemoved: c_int = 512;
-pub const kFSEventStreamEventFlagItemRenamed: c_int = 2048;
-pub const kFSEventStreamEventFlagItemXattrMod: c_int = 32768;
-pub const kFSEventStreamEventFlagKernelDropped: c_int = 4;
-pub const kFSEventStreamEventFlagMount: c_int = 64;
-pub const kFSEventStreamEventFlagRootChanged: c_int = 32;
-pub const kFSEventStreamEventFlagUnmount: c_int = 128;
-pub const kFSEventStreamEventFlagUserDropped: c_int = 2;
+pub extern fn sysinfo(__info: [*c]struct_sysinfo) c_int;
 
 pub fn getFreeMemory() u64 {
-    var memory_: u64 = 0;
-    var size: usize = @sizeOf(@TypeOf(memory_));
-
-    const HW_PHYSMEM64: [2]c_int = [_]c_int{ std.c.CTL.HW, std.c.HW.USERMEM64 };
-
-    if (!(std.c.sysctl(&HW_PHYSMEM64, 2, &memory_, &size, null, 0) == 0)) {
-        return 0;
-    }
-
-    return memory_;
+    var info: struct_sysinfo = undefined;
+    if (sysinfo(&info) == @as(c_int, 0)) return @as(u64, @bitCast(info.freeram)) *% @as(c_ulong, @bitCast(@as(c_ulong, info.mem_unit)));
+    return 0;
 }
 
 pub fn getTotalMemory() u64 {
-    var memory_: u64 = 0;
-    var size: usize = @sizeOf(@TypeOf(memory_));
-
-    const HW_PHYSMEM64: [2]c_int = [_]c_int{ std.c.CTL.HW, std.c.HW.PHYSMEM64 };
-
-    if (!(std.c.sysctl(&HW_PHYSMEM64, 2, &memory_, &size, null, 0) == 0)) {
-        return 0;
-    }
-
-    return memory_;
+    var info: struct_sysinfo = undefined;
+    if (sysinfo(&info) == @as(c_int, 0)) return @as(u64, @bitCast(info.totalram)) *% @as(c_ulong, @bitCast(@as(c_ulong, info.mem_unit)));
+    return 0;
 }
-
-pub const struct_BootTime = struct {
-    sec: u32,
-};
 
 pub fn getSystemUptime() u64 {
-    var uptime_: [16]struct_BootTime = undefined;
-    var size: usize = uptime_.len;
-
-    const KERN_BOOTTIME: [2]c_int = [_]c_int{ std.c.CTL.KERN, std.c.KERN.BOOTTIME };
-
-    if (!(std.c.sysctl(&KERN_BOOTTIME, 2, &uptime_, &size, null, 0) == 0)) {
-        return 0;
-    }
-
-    return @as(u64, @bitCast(std.time.timestamp() - uptime_[0].sec));
+    var info: struct_sysinfo = undefined;
+    if (sysinfo(&info) == @as(c_int, 0)) return @as(u64, @bitCast(info.uptime));
+    return 0;
 }
 
-pub const struct_LoadAvg = struct {
-    ldavg: [3]u32,
-    fscale: c_long,
-};
 pub fn getSystemLoadavg() [3]f64 {
-    var loadavg_: [24]struct_LoadAvg = undefined;
-    var size: usize = loadavg_.len;
-
-    const VM_LOADAVG: [2]c_int = [_]c_int{ std.c.CTL.VM, 2 };
-
-    if (!(std.c.sysctl(&VM_LOADAVG, 2, &loadavg_, &size, null, 0) == 0)) {
-        return [3]f64{ 0.0, 0.0, 0.0 };
+    var info: struct_sysinfo = undefined;
+    if (sysinfo(&info) == @as(c_int, 0)) {
+        return [3]f64{
+            std.math.ceil((@as(f64, @floatFromInt(info.loads[0])) / 65536.0) * 100.0) / 100.0,
+            std.math.ceil((@as(f64, @floatFromInt(info.loads[1])) / 65536.0) * 100.0) / 100.0,
+            std.math.ceil((@as(f64, @floatFromInt(info.loads[2])) / 65536.0) * 100.0) / 100.0,
+        };
     }
+    return [3]f64{ 0, 0, 0 };
+}
 
-    const loadavg = loadavg_[0];
-    const scale = @as(f64, @floatFromInt(loadavg.fscale));
-    return [3]f64{
-        @as(f64, @floatFromInt(loadavg.ldavg[0])) / scale,
-        @as(f64, @floatFromInt(loadavg.ldavg[1])) / scale,
-        @as(f64, @floatFromInt(loadavg.ldavg[2])) / scale,
+pub fn get_version(name_buffer: *[bun.HOST_NAME_MAX]u8) []const u8 {
+    const uts = std.posix.uname();
+    const result = bun.sliceTo(&uts.version, 0);
+    bun.copy(u8, name_buffer, result);
+
+    return name_buffer[0..result.len];
+}
+
+pub fn get_release(name_buffer: *[bun.HOST_NAME_MAX]u8) []const u8 {
+    const uts = std.posix.uname();
+    const result = bun.sliceTo(&uts.release, 0);
+    bun.copy(u8, name_buffer, result);
+
+    return name_buffer[0..result.len];
+}
+
+// Taken from spawn.h header
+pub const POSIX_SPAWN = struct {
+    pub const RESETIDS = 0x01;
+    pub const SETPGROUP = 0x02;
+    pub const SETSIGDEF = 0x04;
+    pub const SETSIGMASK = 0x08;
+    pub const SETSCHEDPARAM = 0x10;
+    pub const SETSCHEDULER = 0x20;
+    pub const USEVFORK = 0x40;
+    pub const SETSID = 0x80;
+};
+
+const fd_t = std.posix.fd_t;
+const pid_t = std.posix.pid_t;
+const mode_t = std.posix.mode_t;
+const sigset_t = std.c.sigset_t;
+const sched_param = std.posix.sched_param;
+
+pub const posix_spawnattr_t = extern struct {
+    __flags: c_short,
+    __pgrp: pid_t,
+    __sd: sigset_t,
+    __ss: sigset_t,
+    __sp: struct_sched_param,
+    __policy: c_int,
+    __pad: [16]c_int,
+};
+pub const struct_sched_param = extern struct {
+    sched_priority: c_int,
+};
+pub const struct___spawn_action = opaque {};
+pub const posix_spawn_file_actions_t = extern struct {
+    __allocated: c_int,
+    __used: c_int,
+    __actions: ?*struct___spawn_action,
+    __pad: [16]c_int,
+};
+
+pub extern "c" fn posix_spawn(
+    pid: *pid_t,
+    path: [*:0]const u8,
+    actions: ?*const posix_spawn_file_actions_t,
+    attr: ?*const posix_spawnattr_t,
+    argv: [*:null]?[*:0]const u8,
+    env: [*:null]?[*:0]const u8,
+) c_int;
+pub extern "c" fn posix_spawnp(
+    pid: *pid_t,
+    path: [*:0]const u8,
+    actions: ?*const posix_spawn_file_actions_t,
+    attr: ?*const posix_spawnattr_t,
+    argv: [*:null]?[*:0]const u8,
+    env: [*:null]?[*:0]const u8,
+) c_int;
+pub extern fn posix_spawnattr_init(__attr: *posix_spawnattr_t) c_int;
+pub extern fn posix_spawnattr_destroy(__attr: *posix_spawnattr_t) c_int;
+pub extern fn posix_spawnattr_getsigdefault(noalias __attr: [*c]const posix_spawnattr_t, noalias __sigdefault: [*c]sigset_t) c_int;
+pub extern fn posix_spawnattr_setsigdefault(noalias __attr: [*c]posix_spawnattr_t, noalias __sigdefault: [*c]const sigset_t) c_int;
+pub extern fn posix_spawnattr_getsigmask(noalias __attr: [*c]const posix_spawnattr_t, noalias __sigmask: [*c]sigset_t) c_int;
+pub extern fn posix_spawnattr_setsigmask(noalias __attr: [*c]posix_spawnattr_t, noalias __sigmask: [*c]const sigset_t) c_int;
+pub extern fn posix_spawnattr_getflags(noalias __attr: [*c]const posix_spawnattr_t, noalias __flags: [*c]c_short) c_int;
+pub extern fn posix_spawnattr_setflags(_attr: [*c]posix_spawnattr_t, __flags: c_short) c_int;
+pub extern fn posix_spawnattr_getpgroup(noalias __attr: [*c]const posix_spawnattr_t, noalias __pgroup: [*c]pid_t) c_int;
+pub extern fn posix_spawnattr_setpgroup(__attr: [*c]posix_spawnattr_t, __pgroup: pid_t) c_int;
+pub extern fn posix_spawnattr_getschedpolicy(noalias __attr: [*c]const posix_spawnattr_t, noalias __schedpolicy: [*c]c_int) c_int;
+pub extern fn posix_spawnattr_setschedpolicy(__attr: [*c]posix_spawnattr_t, __schedpolicy: c_int) c_int;
+pub extern fn posix_spawnattr_getschedparam(noalias __attr: [*c]const posix_spawnattr_t, noalias __schedparam: [*c]struct_sched_param) c_int;
+pub extern fn posix_spawnattr_setschedparam(noalias __attr: [*c]posix_spawnattr_t, noalias __schedparam: [*c]const struct_sched_param) c_int;
+pub extern fn posix_spawn_file_actions_init(__file_actions: *posix_spawn_file_actions_t) c_int;
+pub extern fn posix_spawn_file_actions_destroy(__file_actions: *posix_spawn_file_actions_t) c_int;
+pub extern fn posix_spawn_file_actions_addopen(noalias __file_actions: *posix_spawn_file_actions_t, __fd: c_int, noalias __path: [*:0]const u8, __oflag: c_int, __mode: mode_t) c_int;
+pub extern fn posix_spawn_file_actions_addclose(__file_actions: *posix_spawn_file_actions_t, __fd: c_int) c_int;
+pub extern fn posix_spawn_file_actions_adddup2(__file_actions: *posix_spawn_file_actions_t, __fd: c_int, __newfd: c_int) c_int;
+pub const POSIX_SPAWN_RESETIDS = @as(c_int, 0x01);
+pub const POSIX_SPAWN_SETPGROUP = @as(c_int, 0x02);
+pub const POSIX_SPAWN_SETSIGDEF = @as(c_int, 0x04);
+pub const POSIX_SPAWN_SETSIGMASK = @as(c_int, 0x08);
+pub const POSIX_SPAWN_SETSCHEDPARAM = @as(c_int, 0x10);
+pub const POSIX_SPAWN_SETSCHEDULER = @as(c_int, 0x20);
+pub const POSIX_SPAWN_SETSID = @as(c_int, 0x80);
+
+const posix_spawn_file_actions_addfchdir_np_type = *const fn (actions: *posix_spawn_file_actions_t, filedes: fd_t) c_int;
+const posix_spawn_file_actions_addchdir_np_type = *const fn (actions: *posix_spawn_file_actions_t, path: [*:0]const u8) c_int;
+
+/// When not available, these functions will return 0.
+pub fn posix_spawn_file_actions_addfchdir_np(actions: *posix_spawn_file_actions_t, filedes: std.posix.fd_t) c_int {
+    const function = bun.C.dlsym(posix_spawn_file_actions_addfchdir_np_type, "posix_spawn_file_actions_addfchdir_np") orelse
+        return 0;
+    return function(actions, filedes);
+}
+
+/// When not available, these functions will return 0.
+pub fn posix_spawn_file_actions_addchdir_np(actions: *posix_spawn_file_actions_t, path: [*:0]const u8) c_int {
+    const function = bun.C.dlsym(posix_spawn_file_actions_addchdir_np_type, "posix_spawn_file_actions_addchdir_np") orelse
+        return 0;
+    return function(actions, path);
+}
+
+pub extern fn vmsplice(fd: c_int, iovec: [*]const std.posix.iovec, iovec_count: usize, flags: u32) isize;
+
+const net_c = @cImport({
+    @cInclude("ifaddrs.h"); // getifaddrs, freeifaddrs
+    @cInclude("net/if.h"); // IFF_RUNNING, IFF_UP
+    @cInclude("fcntl.h"); // F_DUPFD_CLOEXEC
+    @cInclude("sys/socket.h");
+});
+
+pub const FD_CLOEXEC = net_c.FD_CLOEXEC;
+pub const freeifaddrs = net_c.freeifaddrs;
+pub const getifaddrs = net_c.getifaddrs;
+pub const ifaddrs = net_c.ifaddrs;
+pub const IFF_LOOPBACK = net_c.IFF_LOOPBACK;
+pub const IFF_RUNNING = net_c.IFF_RUNNING;
+pub const IFF_UP = net_c.IFF_UP;
+pub const MSG_DONTWAIT = net_c.MSG_DONTWAIT;
+pub const MSG_NOSIGNAL = net_c.MSG_NOSIGNAL;
+
+pub const F = struct {
+    pub const DUPFD_CLOEXEC = net_c.F_DUPFD_CLOEXEC;
+    pub const DUPFD = net_c.F_DUPFD;
+};
+
+pub const Mode = u32;
+pub const E = std.posix.E;
+pub const S = std.posix.S;
+
+pub extern "c" fn umask(Mode) Mode;
+
+pub fn getErrno(rc: anytype) E {
+    const Type = @TypeOf(rc);
+
+    return switch (Type) {
+        // raw system calls from std.os.linux.* will return usize
+        // the errno is stored in this value
+        usize => {
+            const signed: isize = @bitCast(rc);
+            const int = if (signed > -4096 and signed < 0) -signed else 0;
+            return @enumFromInt(int);
+        },
+
+        // glibc system call wrapper returns i32/int
+        // the errno is stored in a thread local variable
+        //
+        // TODO: the inclusion of  'u32' and 'isize' seems suspicous
+        i32, c_int, u32, isize, i64 => if (rc == -1)
+            @enumFromInt(std.c._errno().*)
+        else
+            .SUCCESS,
+
+        else => @compileError("Not implemented yet for type " ++ @typeName(Type)),
     };
 }
 
-pub extern fn getuid(...) std.c.uid_t;
-pub extern fn getgid(...) std.c.gid_t;
+pub extern "c" fn getgid() i32;
+pub extern "c" fn getuid() i32;
 
-pub fn get_version(buf: []u8) []const u8 {
-    @memset(buf, 0);
+pub const linux_fs = if (bun.Environment.isOpenBSD) @cImport({
+    @cInclude("ufs/ffs/fs.h");
+}) else struct {};
 
-    var size: usize = buf.len;
-    const KERN_VERSION: [2]c_int = [_]c_int{ std.c.CTL.KERN, std.c.KERN.VERSION };
-
-    if (!(std.c.sysctl(&KERN_VERSION, 2, buf.ptr, &size, null, 0) == 0)) {
-        return "unknown";
-    }
-
-    return bun.sliceTo(buf, 0);
+/// https://man7.org/linux/man-pages/man2/ioctl_ficlone.2.html
+///
+/// Support for FICLONE is dependent on the filesystem driver.
+pub fn ioctl_ficlone(dest_fd: bun.FileDescriptor, srcfd: bun.FileDescriptor) usize {
+    return std.os.ope.ioctl(dest_fd.cast(), linux_fs.FICLONE, @intCast(srcfd.int()));
 }
 
-pub fn get_release(buf: []u8) []const u8 {
-    @memset(buf, 0);
+pub const RWFFlagSupport = enum(u8) {
+    unknown = 0,
+    unsupported = 2,
+    supported = 1,
 
-    var size: usize = buf.len;
-    const KERN_OSRELEASE: [2]c_int = [_]c_int{ std.c.CTL.KERN, std.c.KERN.OSRELEASE };
+    var rwf_bool = std.atomic.Value(RWFFlagSupport).init(RWFFlagSupport.unknown);
 
-    if (!(std.c.sysctl(&KERN_OSRELEASE, 2, buf.ptr, &size, null, 0) == 0)) {
-        return "unknown";
+    pub fn isLinuxKernelVersionWithBuggyRWF_NONBLOCK() bool {
+        return bun.linuxKernelVersion().major == 5 and switch (bun.linuxKernelVersion().minor) {
+            9, 10 => true,
+            else => false,
+        };
     }
 
-    return bun.sliceTo(buf, 0);
-}
+    pub fn disable() void {
+        rwf_bool.store(.unsupported, .monotonic);
+    }
 
-const IO_CTL_RELATED = struct {
-    pub const IOCPARM_MASK = @as(c_int, 0x1fff);
-    pub inline fn IOCPARM_LEN(x: anytype) @TypeOf((x >> @as(c_int, 16)) & IOCPARM_MASK) {
-        return (x >> @as(c_int, 16)) & IOCPARM_MASK;
+    /// Workaround for https://github.com/google/gvisor/issues/2601
+    pub fn isMaybeSupported() bool {
+        if (comptime !bun.Environment.isOpenBSD) return false;
+        switch (rwf_bool.load(.monotonic)) {
+            .unknown => {
+                if (isLinuxKernelVersionWithBuggyRWF_NONBLOCK()) {
+                    rwf_bool.store(.unsupported, .monotonic);
+                    return false;
+                }
+
+                rwf_bool.store(.supported, .monotonic);
+                return true;
+            },
+            .supported => {
+                return true;
+            },
+            else => {
+                return false;
+            },
+        }
+
+        unreachable;
     }
-    pub inline fn IOCBASECMD(x: anytype) @TypeOf(x & ~(IOCPARM_MASK << @as(c_int, 16))) {
-        return x & ~(IOCPARM_MASK << @as(c_int, 16));
-    }
-    pub inline fn IOCGROUP(x: anytype) @TypeOf((x >> @as(c_int, 8)) & @as(c_int, 0xff)) {
-        return (x >> @as(c_int, 8)) & @as(c_int, 0xff);
-    }
-    pub const IOCPARM_MAX = IOCPARM_MASK + @as(c_int, 1);
-    pub const IOC_VOID = @import("std").zig.c_translation.cast(u32, @import("std").zig.c_translation.promoteIntLiteral(c_int, 0x20000000, .hex));
-    pub const IOC_OUT = @import("std").zig.c_translation.cast(u32, @import("std").zig.c_translation.promoteIntLiteral(c_int, 0x40000000, .hex));
-    pub const IOC_IN = @import("std").zig.c_translation.cast(u32, @import("std").zig.c_translation.promoteIntLiteral(c_int, 0x80000000, .hex));
-    pub const IOC_INOUT = IOC_IN | IOC_OUT;
-    pub const IOC_DIRMASK = @import("std").zig.c_translation.cast(u32, @import("std").zig.c_translation.promoteIntLiteral(c_int, 0xe0000000, .hex));
-    pub inline fn _IOC(inout: anytype, group: anytype, num: anytype, len: anytype) @TypeOf(((inout | ((len & IOCPARM_MASK) << @as(c_int, 16))) | (group << @as(c_int, 8))) | num) {
-        return ((inout | ((len & IOCPARM_MASK) << @as(c_int, 16))) | (group << @as(c_int, 8))) | num;
-    }
-    pub inline fn _IO(g: anytype, n: anytype) @TypeOf(_IOC(IOC_VOID, g, n, @as(c_int, 0))) {
-        return _IOC(IOC_VOID, g, n, @as(c_int, 0));
-    }
-    pub inline fn _IOR(g: anytype, n: anytype, t: anytype) @TypeOf(_IOC(IOC_OUT, g, n, @import("std").zig.c_translation.sizeof(t))) {
-        return _IOC(IOC_OUT, g, n, @import("std").zig.c_translation.sizeof(t));
-    }
-    pub inline fn _IOW(g: anytype, n: anytype, t: anytype) @TypeOf(_IOC(IOC_IN, g, n, @import("std").zig.c_translation.sizeof(t))) {
-        return _IOC(IOC_IN, g, n, @import("std").zig.c_translation.sizeof(t));
-    }
-    pub inline fn _IOWR(g: anytype, n: anytype, t: anytype) @TypeOf(_IOC(IOC_INOUT, g, n, @import("std").zig.c_translation.sizeof(t))) {
-        return _IOC(IOC_INOUT, g, n, @import("std").zig.c_translation.sizeof(t));
-    }
-    pub const TIOCMODG = _IOR('t', @as(c_int, 3), c_int);
-    pub const TIOCMODS = _IOW('t', @as(c_int, 4), c_int);
-    pub const TIOCM_LE = @as(c_int, 0o001);
-    pub const TIOCM_DTR = @as(c_int, 0o002);
-    pub const TIOCM_RTS = @as(c_int, 0o004);
-    pub const TIOCM_ST = @as(c_int, 0o010);
-    pub const TIOCM_SR = @as(c_int, 0o020);
-    pub const TIOCM_CTS = @as(c_int, 0o040);
-    pub const TIOCM_CAR = @as(c_int, 0o100);
-    pub const TIOCM_CD = TIOCM_CAR;
-    pub const TIOCM_RNG = @as(c_int, 0o200);
-    pub const TIOCM_RI = TIOCM_RNG;
-    pub const TIOCM_DSR = @as(c_int, 0o400);
-    pub const TIOCEXCL = _IO('t', @as(c_int, 13));
-    pub const TIOCNXCL = _IO('t', @as(c_int, 14));
-    pub const TIOCFLUSH = _IOW('t', @as(c_int, 16), c_int);
-    pub const TIOCGETD = _IOR('t', @as(c_int, 26), c_int);
-    pub const TIOCSETD = _IOW('t', @as(c_int, 27), c_int);
-    pub const TIOCIXON = _IO('t', @as(c_int, 129));
-    pub const TIOCIXOFF = _IO('t', @as(c_int, 128));
-    pub const TIOCSBRK = _IO('t', @as(c_int, 123));
-    pub const TIOCCBRK = _IO('t', @as(c_int, 122));
-    pub const TIOCSDTR = _IO('t', @as(c_int, 121));
-    pub const TIOCCDTR = _IO('t', @as(c_int, 120));
-    pub const TIOCGPGRP = _IOR('t', @as(c_int, 119), c_int);
-    pub const TIOCSPGRP = _IOW('t', @as(c_int, 118), c_int);
-    pub const TIOCOUTQ = _IOR('t', @as(c_int, 115), c_int);
-    pub const TIOCSTI = _IOW('t', @as(c_int, 114), u8);
-    pub const TIOCNOTTY = _IO('t', @as(c_int, 113));
-    pub const TIOCPKT = _IOW('t', @as(c_int, 112), c_int);
-    pub const TIOCPKT_DATA = @as(c_int, 0x00);
-    pub const TIOCPKT_FLUSHREAD = @as(c_int, 0x01);
-    pub const TIOCPKT_FLUSHWRITE = @as(c_int, 0x02);
-    pub const TIOCPKT_STOP = @as(c_int, 0x04);
-    pub const TIOCPKT_START = @as(c_int, 0x08);
-    pub const TIOCPKT_NOSTOP = @as(c_int, 0x10);
-    pub const TIOCPKT_DOSTOP = @as(c_int, 0x20);
-    pub const TIOCPKT_IOCTL = @as(c_int, 0x40);
-    pub const TIOCSTOP = _IO('t', @as(c_int, 111));
-    pub const TIOCSTART = _IO('t', @as(c_int, 110));
-    pub const TIOCMSET = _IOW('t', @as(c_int, 109), c_int);
-    pub const TIOCMBIS = _IOW('t', @as(c_int, 108), c_int);
-    pub const TIOCMBIC = _IOW('t', @as(c_int, 107), c_int);
-    pub const TIOCMGET = _IOR('t', @as(c_int, 106), c_int);
-    // pub const TIOCGWINSZ = _IOR('t', @as(c_int, 104), struct_winsize);
-    // pub const TIOCSWINSZ = _IOW('t', @as(c_int, 103), struct_winsize);
-    pub const TIOCUCNTL = _IOW('t', @as(c_int, 102), c_int);
-    pub const TIOCSTAT = _IO('t', @as(c_int, 101));
-    pub inline fn UIOCCMD(n: anytype) @TypeOf(_IO('u', n)) {
-        return _IO('u', n);
-    }
-    pub const TIOCSCONS = _IO('t', @as(c_int, 99));
-    pub const TIOCCONS = _IOW('t', @as(c_int, 98), c_int);
-    pub const TIOCSCTTY = _IO('t', @as(c_int, 97));
-    pub const TIOCEXT = _IOW('t', @as(c_int, 96), c_int);
-    pub const TIOCSIG = _IO('t', @as(c_int, 95));
-    pub const TIOCDRAIN = _IO('t', @as(c_int, 94));
-    pub const TIOCMSDTRWAIT = _IOW('t', @as(c_int, 91), c_int);
-    pub const TIOCMGDTRWAIT = _IOR('t', @as(c_int, 90), c_int);
-    pub const TIOCSDRAINWAIT = _IOW('t', @as(c_int, 87), c_int);
-    pub const TIOCGDRAINWAIT = _IOR('t', @as(c_int, 86), c_int);
-    pub const TIOCDSIMICROCODE = _IO('t', @as(c_int, 85));
-    pub const TIOCPTYGRANT = _IO('t', @as(c_int, 84));
-    pub const TIOCPTYGNAME = _IOC(IOC_OUT, 't', @as(c_int, 83), @as(c_int, 128));
-    pub const TIOCPTYUNLK = _IO('t', @as(c_int, 82));
-    pub const TTYDISC = @as(c_int, 0);
-    pub const TABLDISC = @as(c_int, 3);
-    pub const SLIPDISC = @as(c_int, 4);
-    pub const PPPDISC = @as(c_int, 5);
-    // pub const TIOCGSIZE = TIOCGWINSZ;
-    // pub const TIOCSSIZE = TIOCSWINSZ;
-    pub const FIOCLEX = _IO('f', @as(c_int, 1));
-    pub const FIONCLEX = _IO('f', @as(c_int, 2));
-    pub const FIONREAD = _IOR('f', @as(c_int, 127), c_int);
-    pub const FIONBIO = _IOW('f', @as(c_int, 126), c_int);
-    pub const FIOASYNC = _IOW('f', @as(c_int, 125), c_int);
-    pub const FIOSETOWN = _IOW('f', @as(c_int, 124), c_int);
-    pub const FIOGETOWN = _IOR('f', @as(c_int, 123), c_int);
-    pub const FIODTYPE = _IOR('f', @as(c_int, 122), c_int);
-    pub const SIOCSHIWAT = _IOW('s', @as(c_int, 0), c_int);
-    pub const SIOCGHIWAT = _IOR('s', @as(c_int, 1), c_int);
-    pub const SIOCSLOWAT = _IOW('s', @as(c_int, 2), c_int);
-    pub const SIOCGLOWAT = _IOR('s', @as(c_int, 3), c_int);
-    pub const SIOCATMARK = _IOR('s', @as(c_int, 7), c_int);
-    pub const SIOCSPGRP = _IOW('s', @as(c_int, 8), c_int);
-    pub const SIOCGPGRP = _IOR('s', @as(c_int, 9), c_int);
-    // pub const SIOCSETVLAN = SIOCSIFVLAN;
-    // pub const SIOCGETVLAN = SIOCGIFVLAN;
 };
 
-pub usingnamespace IO_CTL_RELATED;
+pub extern "C" fn sys_preadv2(
+    fd: c_int,
+    iov: [*]const std.posix.iovec,
+    iovcnt: c_int,
+    offset: std.posix.off_t,
+    flags: c_uint,
+) isize;
 
-// As of Zig v0.11.0-dev.1393+38eebf3c4, ifaddrs.h is not included in the headers
-pub const ifaddrs = extern struct {
-    ifa_next: ?*ifaddrs,
-    ifa_name: [*:0]u8,
-    ifa_flags: c_uint,
-    ifa_addr: ?*std.os.sockaddr,
-    ifa_netmask: ?*std.os.sockaddr,
-    ifa_dstaddr: ?*std.os.sockaddr,
-    ifa_data: *anyopaque,
-};
-pub extern fn getifaddrs(*?*ifaddrs) c_int;
-pub extern fn freeifaddrs(?*ifaddrs) void;
+pub extern "C" fn sys_pwritev2(
+    fd: c_int,
+    iov: [*]const std.posix.iovec_const,
+    iovcnt: c_int,
+    offset: std.posix.off_t,
+    flags: c_uint,
+) isize;
 
-const net_if_h = @cImport({
-    @cInclude("net/if.h");
+// #define RENAME_NOREPLACE    (1 << 0)    /* Don't overwrite target */
+// #define RENAME_EXCHANGE     (1 << 1)    /* Exchange source and dest */
+// #define RENAME_WHITEOUT     (1 << 2)    /* Whiteout source */
+
+pub const RENAME_NOREPLACE = 1 << 0;
+pub const RENAME_EXCHANGE = 1 << 1;
+pub const RENAME_WHITEOUT = 1 << 2;
+
+pub extern "C" fn _Exit(code: c_int) noreturn;
+pub extern "C" fn memrchr(ptr: [*]const u8, val: c_int, len: usize) ?[*]const u8;
+
+pub const netdb = @cImport({
+    @cInclude("netdb.h");
 });
-pub const IFF_RUNNING = net_if_h.IFF_RUNNING;
-pub const IFF_UP = net_if_h.IFF_UP;
-pub const IFF_LOOPBACK = net_if_h.IFF_LOOPBACK;
-pub const sockaddr_dl = extern struct {
-    sdl_len: u8, // Total length of sockaddr */
-    sdl_family: u8, // AF_LINK */
-    sdl_index: u16, // if != 0, system given index for interface */
-    sdl_type: u8, // interface type */
-    sdl_nlen: u8, // interface name length, no trailing 0 reqd. */
-    sdl_alen: u8, // link level address length */
-    sdl_slen: u8, // link layer selector length */
-    sdl_data: [24]u8, // minimum work area, can be larger; contains both if name and ll address */
-};
-
-pub usingnamespace @cImport({
-    @cInclude("spawn.h");
-});
-
-// it turns out preallocating on APFS on an M1 is slower.
-// so this is a linux-only optimization for now.
-pub const preallocate_length = std.math.maxInt(u51);
-
-pub const Mode = std.os.mode_t;
-
-pub const E = std.os.E;
-pub const S = std.os.S;
-pub fn getErrno(rc: anytype) E {
-    return std.c.getErrno(rc);
-}
-
-pub const utsname = extern struct {
-    sysname: [256:0]u8,
-    nodename: [256:0]u8,
-    release: [256:0]u8,
-    version: [256:0]u8,
-    machine: [256:0]u8,
-};
-
-//pub extern "c" fn umask(Mode) Mode;
